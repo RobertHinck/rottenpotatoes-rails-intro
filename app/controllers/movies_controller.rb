@@ -12,21 +12,52 @@ class MoviesController < ApplicationController
 
   def index
     
+    #define all_ratings for the checkboxes
     @all_ratings =  Movie.possible_ratings
     
-    if params[:ratings].nil?
-      @movies = Movie.all
-    else
-      @movies = Movie.where(rating: params[:ratings].keys)
-    end 
-
+    #store everything in session
+    if params[:sort]
+      session[:sort] = params[:sort]
+    end
+    
+    if params[:ratings]
+      session[:ratings] = params[:ratings]
+    end
+    
+    #check params for sorting by title
     if params[:sort] == 'title'
       @title_header = 'hilite'
       @movies = Movie.order(:title)
-    elsif params[:sort] == 'release_date'
+      
+    #check params for sorting by date
+    elsif params[:sort] == 'date'
       @release_date_header ='hilite'
       @movies = Movie.order(:release_date)
-    end 
+      
+    #if not in params check session and redirect if necessary
+    elsif session[:sort]
+      @title_header = 'hilite'
+      flash.keep
+      redirect_to movies_path(:sort => session[:sort])
+      return
+      
+    #otherwise show all
+    else
+      @movies = Movie.all
+    end
+
+    #check params for ratings filter
+    if !params[:ratings].nil?
+      @movies = @movies.where(rating: params[:ratings].keys)
+      
+    # if not in params check session and redirect if necessary
+    elsif !session[:ratings].nil?
+      flash.keep
+      redirect_to movies_path(:sort => session[:sort], :ratings => session[:ratings])
+      return
+    end
+    
+
   end
 
   def new

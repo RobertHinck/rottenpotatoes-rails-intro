@@ -1,5 +1,7 @@
 class Movie < ActiveRecord::Base
+    
+    # returns all the different ratings in the database
     def self.possible_ratings
-        ['G','PG','PG-13','R']
+        self.uniq.pluck(:rating).sort
     end
 end
